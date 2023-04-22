@@ -10,7 +10,6 @@ import { useEffect, useState } from 'react';
 import { NavigationContainer } from '@react-navigation/native';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import * as React from 'react';
-import { SafeAreaView } from 'react-native-safe-area-context';
 import * as Font from 'expo-font';
 import FontAwesome from '@expo/vector-icons/FontAwesome';
 import { CheckBox } from 'react-native-elements';
@@ -69,7 +68,7 @@ function Question({navigation, route}) {
     } else {
       userChoices.push(selectedIndexes)
     }
-    if (nextQuestion < sampleData.length) {
+    if (nextQuestion < questions.length) {
       console.log("next question")
       navigation.navigate('Question', {
         questionNumber: nextQuestion,
