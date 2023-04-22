@@ -1,1 +1,1 @@
-# studying-app
+# Studying App
