@@ -58,7 +58,6 @@ function Question({navigation, route}) {
   console.log(route.params)
   const { questionNumber, userChoices, data } = route.params
   let { choices, prompt, type } = data[questionNumber]
-  let initialSelection = 0
   let [selectedIndex, setSelectedIndex] = useState(0)
   let [selectedIndexes, setSelectedIndexes] = useState([])
   let nextQuestion = () => {
@@ -97,11 +96,12 @@ function Question({navigation, route}) {
         }}
         containerStyle={{marginBottom: 20, width: '70'}}
         />
-    ):(
+    ) : (
       <ButtonGroup
         testID="choices"
         buttons={choices}
         vertical
+        selectMultiple
         selectedIndexes={selectedIndexes}
         onPress={(value) => {
           setSelectedIndexes(value)
@@ -123,29 +123,21 @@ function Question({navigation, route}) {
     let calculateCorrect = (userSelected, correct, type) => {
       let userCorrect = false 
       if (type == 'multiple-answer') {
-        userCorrect = userSelected.sort().toString() === correct.sort().toString()
-        userCorrect = userSelected == correct 
-      }
-      return userCorrect
-    }
-    let calculateCorrectSet = (userSelected, correct, type) => {
-      let userCorrect = false 
-      if (type == 'multiple-answer') {
-        userCorrect = correct.every((item) => userSelected.includes(item)) &&
-        userSelected.every((item) => correct.includes(item))
+        userCorrect = correct.every(item => userSelected.includes(item))
+        && userSelected.every(item => correct.includes(item))
       } else {
-        userCorrect = userSelected == correct 
+        userCorrect = userSelected === correct 
       }
       return userCorrect
     }
     let totalScore = 0
     for (let i = 0; i < route.params.data.length; i++) {
-      if (calculateCorrect(
-        route.params.userChoices[i],
-        route.params.data[i].correct,
-        route.params.data[i].type
-        )
-      ) {
+      if (
+        calculateCorrect(
+          route.params.userChoices[i],
+          route.params.data[i].correct,
+          route.params.data[i].type
+        )) {
         totalScore++
       }
     }
@@ -163,7 +155,7 @@ function Question({navigation, route}) {
         let userCorrect = calculateCorrect(userSelected, correct, type)
         return (
           <View key={index}>
-            <Text>{prompt}</Text>
+            <Text style={styles.subheading}>{prompt}</Text>
             {choices.map((value, choiceIndex) => {
               let incorrect = false
               let userDidSelect = false 
