@@ -13,6 +13,7 @@ import * as React from 'react';
 import * as Font from 'expo-font';
 import FontAwesome from '@expo/vector-icons/FontAwesome';
 import { CheckBox } from 'react-native-elements';
+import SelectDropdown from 'react-native-select-dropdown';
 
 async function cacheFonts(fonts) {
   return fonts.map(async (font) => await Font.loadAsync(font))
@@ -21,7 +22,7 @@ const Stack = createNativeStackNavigator()
 
 const questions = [
   {
-    "prompt": "Q1: Select the best answer: Who are you?",
+    "prompt": `Q1: Select the best answer:\n "Who are you?"`,
     "type": "multiple-choice",
     "choices": [
       "It's just me, myself and I",
@@ -32,7 +33,7 @@ const questions = [
     "correct": 3
   },
   {
-    "prompt": "Q2: Fill in the blank: Happy ______ day",
+    "prompt": `Q2: Fill in the blank:\n "Happy ______ day"`,
     "type": "multiple-answer",
     "choices": [
       "Birthday",
@@ -44,11 +45,31 @@ const questions = [
   },
   {
     "prompt": `Q3: Is the following statment true or false?\n
-      Stray Kids, STAY or none, we're gonna cross the finish line`,
+      "Stray Kids, STAY or none, we're gonna cross the finish line"`,
     "type": "true-false",
     "choices": [
       "True",
       "False",
+  ],
+    "correct": 0
+  },
+  {
+    "prompt": `Q4: What does ZB1 stand for?`,
+    "type": "open-response",
+    "correct": "zerobaseone"
+  },
+  {
+    "prompt": `Q5: Complete the quote:\n
+      "We the best ___"`,
+    "type": "drop-down",
+    "choices": [
+      "Boyz",
+      "Boys",
+      "Fruits",
+      "Kids",
+      "Adults",
+      "Girlz",
+      "Girls",
   ],
     "correct": 0
   },
@@ -62,7 +83,7 @@ function Question({navigation, route}) {
   let [selectedIndexes, setSelectedIndexes] = useState([])
   let nextQuestion = () => {
     let nextQuestion = questionNumber + 1
-    if ( type !== 'multiple-answer') {
+    if ( type !== 'multiple-answer' || 'drop-down') {
       userChoices.push(selectedIndex)
     } else {
       userChoices.push(selectedIndexes)
@@ -85,7 +106,7 @@ function Question({navigation, route}) {
   return (
   <View style={styles.container}>
     <Text style={styles.heading}>{prompt}</Text>
-    {type !== 'multiple-answer' ? (
+    {type !== 'multiple-answer' || 'drop-down' ? (
       <ButtonGroup
         testID="choices"
         buttons={choices}
@@ -109,11 +130,29 @@ function Question({navigation, route}) {
         containerStyle={{marginBottom: 20, width: '70'}}
         
       />
+    ) : (
+      <SelectDropdown
+        data={questions}
+        onSelect={(selectedItem, index) => {
+          styles={backgroundColor='lightgreen'}
+          console.log(selectedItem, index)
+        }}
+        buttonTextAfterSelection={(selectedItem, index) => {
+          // text represented after item is selected
+          // if data array is an array of objects then return selectedItem.property to render after item is selected
+          return selectedItem
+        }}
+        rowTextForSelection={(item, index) => {
+          // text represented for each item in dropdown
+          // if data array is an array of objects then return item.property to represent item in dropdown
+          return item
+        }}
+      ></SelectDropdown>
     )}
     <Button 
       testId="next-question"
       onPress={nextQuestion}
-      title="Submit"
+      title="Next"
     ></Button>
   </View>
   )
@@ -193,6 +232,7 @@ function Question({navigation, route}) {
           )
         }}
       ></FlatList>
+      <Button title="Restart" style={styles.button} onPress={() => navigation.navigate('Question')}></Button>
     </View>
     )  
   }
@@ -217,7 +257,7 @@ export default function App() {
           initialParams={{
             questionNumber: questions.length - 1,
             data: questions,
-            userChoices: [3, [1, 3], 0],
+            userChoices: [3, [1, 3], 0, "zerobaseone", "Boyz"],
           }}
           options={{headerShown: false}}
           component={SummaryScreen}
