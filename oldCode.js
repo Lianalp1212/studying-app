@@ -957,3 +957,40 @@ const styles = StyleSheet.create({
     padding: 10
   }
 })
+
+
+
+
+
+if (type == 'drop-down') {
+  return (
+    <View style={styles.container}>
+      <Text style={styles.heading}>{prompt}</Text>
+      <SelectDropdown
+          data={questions[4].choices}
+          onSelect={(selectedItem, index) => {
+            console.log(selectedItem, index)
+            setDropDown(true)
+          }}
+          buttonTextAfterSelection={(selectedItem, index) => {
+            // text represented after item is selected
+            // if data array is an array of objects then return selectedItem.property to render after item is selected
+            return selectedItem.choice
+          }}
+          rowTextForSelection={(item, index) => {
+            // text represented for each item in dropdown
+            // if data array is an array of objects then return item.property to represent item in dropdown
+            return item
+          }}
+          onPress={(value) => {
+            setSelectedIndex(value)
+          }}
+      />
+      <Button 
+        testId="next-question"
+        onPress={nextQuestion}
+        title="Next"
+      ></Button>
+    </View>
+  )
+}
