@@ -40,7 +40,7 @@ const questions = [
       "Best",
       "Worst",
   ],
-    "correct": [1,3]
+    "correct": [1, 3]
   },
   {
     "prompt": `Q3: Is the following statment true or false?\n
@@ -53,36 +53,6 @@ const questions = [
     "correct": 0
   },
 ]
-
-export default function App() {
-  cacheFonts([FontAwesome.font])
-  return (
-    <NavigationContainer>
-      <Stack.Navigator initialRouteName="Question">
-        <Stack.Screen
-          name="Question"
-          initialParams={{
-            questionNumber: 0,
-            data: questions,
-            userChoices: []
-          }}
-          options={{headerShown: false}}>
-          {(props) => <Question {...props} />}
-        </Stack.Screen>
-        <Stack.Screen
-          name="SummaryScreen"
-          initialParams={{
-            questionNumber: questions.length - 1,
-            data: questions,
-            userChoices: [3, [1, 3], 0],
-          }}
-          options={{headerShown: false}}
-          component={SummaryScreen}
-        ></Stack.Screen>
-      </Stack.Navigator>
-    </NavigationContainer>
-  )
-}
 
 function Question({navigation, route}) {
   console.log(route.params)
@@ -126,18 +96,18 @@ function Question({navigation, route}) {
           setSelectedIndex(value)
         }}
         containerStyle={{marginBottom: 20, width: '70'}}
-        style={styles.buttonGroup}
         />
     ):(
       <ButtonGroup
         testID="choices"
         buttons={choices}
-        selectedIndex={selectedIndexes}
+        vertical
+        selectedIndexes={selectedIndexes}
         onPress={(value) => {
           setSelectedIndexes(value)
         }}
         containerStyle={{marginBottom: 20, width: '70'}}
-        style={styles.buttonGroup}
+        
       />
     )}
     <Button 
@@ -149,89 +119,120 @@ function Question({navigation, route}) {
   )
 }
 
-function SummaryScreen({route}) {
-  let calculateCorrect = (userSelected, correct, type) => {
-    let userCorrect = false 
-    if (type == 'multiple-answer') {
-      userCorrect = userSelected.sort().toString() === correct.sort().toString()
-      userCorrect = userSelected == correct 
+  function SummaryScreen({route}) {
+    let calculateCorrect = (userSelected, correct, type) => {
+      let userCorrect = false 
+      if (type == 'multiple-answer') {
+        userCorrect = userSelected.sort().toString() === correct.sort().toString()
+        userCorrect = userSelected == correct 
+      }
+      return userCorrect
     }
-    return userCorrect
-  }
-  let calculateCorrectSet = (userSelected, correct, type) => {
-    let userCorrect = false 
-    if (type == 'multiple-answer') {
-      userCorrect = correct.every((item) => userSelected.includes(item)) &&
-      userSelected.every((item) => correct.includes(item))
-    } else {
-      userCorrect = userSelected == correct 
+    let calculateCorrectSet = (userSelected, correct, type) => {
+      let userCorrect = false 
+      if (type == 'multiple-answer') {
+        userCorrect = correct.every((item) => userSelected.includes(item)) &&
+        userSelected.every((item) => correct.includes(item))
+      } else {
+        userCorrect = userSelected == correct 
+      }
+      return userCorrect
     }
-    return userCorrect
-  }
-  let totalScore = 0
-  for (let i = 0; i < route.params.data.length; i++) {
-    if (calculateCorrect(
-      route.params.userChoices[i],
-      route.params.data[i].correct,
-      route.params.data[i].type
-      )
-    ) {
-      totalScore++
-    }
-  }
-return (
-  <View style={styles.container}>
-    <Text style={styles.heading}>Summary</Text>
-    <Text style={styles.subheading}>Score: {totalScore}</Text>
-    <FlatList
-    data={route.params.data}
-    renderItem={({item, index}) => {
-      let { choices, prompt, type, correct } = item
-      let userSelected = route.params.userChoices[index]
-      let userCorrect = calculateCorrect(userSelected, correct, type)
-      return (
-        <View key={index}>
-          <Text style={styles.heading}>{prompt}</Text>
-          {choices.map((value, choiceIndex) => {
-            let incorrect = false
-            let userDidSelect = false 
-            if (type == 'multiple-answer') {
-              userDidSelect = userSelected.includes(choiceIndex)
-              incorrect = userDidSelect && !correct.includes(choiceIndex)
-            } else {
-              userDidSelect = userSelected == choiceIndex
-              incorrect = userDidSelect && userSelected !== correct
-            }
-            return (
-              <CheckBox
-              containerStyle={{
-                backgroundColor: userDidSelect ? incorrect == false
-                  ? 'lightgreen'
-                  : 'gray'
-                : undefined,
-              }}
-              checked = {
-                type == 'multiple-answer'
-                  ? correct.includes(choiceIndex)
-                  : correct == choiceIndex
-              }
-              textStyle={{
-                textDecorationLine: incorrect
-                  ? 'line-through'
-                  : undefined,
-              }}
-              key={value}
-              title={value}
-              ></CheckBox>
-            )
-          })}
-        </View>
+    let totalScore = 0
+    for (let i = 0; i < route.params.data.length; i++) {
+      if (calculateCorrect(
+        route.params.userChoices[i],
+        route.params.data[i].correct,
+        route.params.data[i].type
         )
-      }}
-    ></FlatList>
-    
-  </View>
-  )  
+      ) {
+        totalScore++
+      }
+    }
+  return (
+    <View style={styles.container}>
+      <View>
+        <Text style={styles.heading}>Summary</Text>
+        <Text style={styles.subheading}>Score: {totalScore}</Text>
+      </View>
+      <FlatList
+      data={route.params.data}
+      renderItem={({item, index}) => {
+        let { choices, prompt, type, correct } = item
+        let userSelected = route.params.userChoices[index]
+        let userCorrect = calculateCorrect(userSelected, correct, type)
+        return (
+          <View key={index}>
+            <Text>{prompt}</Text>
+            {choices.map((value, choiceIndex) => {
+              let incorrect = false
+              let userDidSelect = false 
+              if (type == 'multiple-answer') {
+                userDidSelect = userSelected.includes(choiceIndex)
+                incorrect = userDidSelect && !correct.includes(choiceIndex)
+              } else {
+                userDidSelect = userSelected == choiceIndex
+                incorrect = userDidSelect && userSelected !== correct
+              }
+              return (
+                <CheckBox
+                containerStyle={{
+                  backgroundColor: userDidSelect ? incorrect == false
+                    ? 'lightgreen'
+                    : 'gray'
+                  : undefined,
+                }}
+                checked = {
+                  type == 'multiple-answer'
+                    ? correct.includes(choiceIndex)
+                    : correct == choiceIndex
+                }
+                textStyle={{
+                  textDecorationLine: incorrect
+                    ? 'line-through'
+                    : undefined,
+                }}
+                key={value}
+                title={value}
+                ></CheckBox>
+              )
+            })}
+          </View>
+          )
+        }}
+      ></FlatList>
+    </View>
+    )  
+  }
+
+export default function App() {
+  cacheFonts([FontAwesome.font])
+  return (
+    <NavigationContainer>
+      <Stack.Navigator initialRouteName="Question">
+        <Stack.Screen
+          name="Question"
+          initialParams={{
+            questionNumber: 0,
+            data: questions,
+            userChoices: []
+          }}
+          options={{headerShown: false}}>
+          {(props) => <Question {...props} />}
+        </Stack.Screen>
+        <Stack.Screen
+          name="SummaryScreen"
+          initialParams={{
+            questionNumber: questions.length - 1,
+            data: questions,
+            userChoices: [3, [1, 3], 0],
+          }}
+          options={{headerShown: false}}
+          component={SummaryScreen}
+        ></Stack.Screen>
+      </Stack.Navigator>
+    </NavigationContainer>
+  )
 }
 
 const styles = StyleSheet.create({
@@ -255,7 +256,7 @@ const styles = StyleSheet.create({
     color : "white",
     textAlign : "center",
     paddingVertical : 5,
-    marginBottom : 10
+    marginBottom : 10,
   },
   space: {
     height: 10
@@ -265,14 +266,15 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
     textAlign: 'center',
-    padding: 20
+    paddingTop: 20,
+    paddingBottom: 10
   },
   subheading: {
     fontSize: 25,
     alignItems: 'center',
     justifyContent: 'center',
     textAlign: 'center',
-    padding: 20
+    paddingBottom: 20
   },
   summary: {
     fontSize: 20,
