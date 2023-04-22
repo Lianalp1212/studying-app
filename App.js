@@ -54,6 +54,36 @@ const questions = [
   },
 ]
 
+export default function App() {
+  cacheFonts([FontAwesome.font])
+  return (
+    <NavigationContainer>
+      <Stack.Navigator initialRouteName="Question">
+        <Stack.Screen
+          name="Question"
+          initialParams={{
+            questionNumber: 0,
+            data: questions,
+            userChoices: []
+          }}
+          options={{headerShown: false}}>
+          {(props) => <Question {...props} />}
+        </Stack.Screen>
+        <Stack.Screen
+          name="SummaryScreen"
+          initialParams={{
+            questionNumber: questions.length - 1,
+            data: questions,
+            userChoices: [3, [1, 3], 0],
+          }}
+          options={{headerShown: false}}
+          component={SummaryScreen}
+        ></Stack.Screen>
+      </Stack.Navigator>
+    </NavigationContainer>
+  )
+}
+
 function Question({navigation, route}) {
   console.log(route.params)
   const { questionNumber, userChoices, data } = route.params
@@ -85,27 +115,29 @@ function Question({navigation, route}) {
   }
   return (
   <View style={styles.container}>
-    <Text>{prompt}</Text>
+    <Text style={styles.heading}>{prompt}</Text>
     {type !== 'multiple-answer' ? (
       <ButtonGroup
         testID="choices"
         buttons={choices}
+        vertical
         selectedIndex={selectedIndex}
         onPress={(value) => {
           setSelectedIndex(value)
         }}
         containerStyle={{marginBottom: 20, width: '70'}}
+        style={styles.buttonGroup}
         />
     ):(
       <ButtonGroup
         testID="choices"
         buttons={choices}
-        vertical
         selectedIndex={selectedIndexes}
         onPress={(value) => {
           setSelectedIndexes(value)
         }}
         containerStyle={{marginBottom: 20, width: '70'}}
+        style={styles.buttonGroup}
       />
     )}
     <Button 
@@ -149,6 +181,8 @@ function SummaryScreen({route}) {
   }
 return (
   <View style={styles.container}>
+    <Text style={styles.heading}>Summary</Text>
+    <Text style={styles.subheading}>Score: {totalScore}</Text>
     <FlatList
     data={route.params.data}
     renderItem={({item, index}) => {
@@ -157,7 +191,7 @@ return (
       let userCorrect = calculateCorrect(userSelected, correct, type)
       return (
         <View key={index}>
-          <Text>{prompt}</Text>
+          <Text style={styles.heading}>{prompt}</Text>
           {choices.map((value, choiceIndex) => {
             let incorrect = false
             let userDidSelect = false 
@@ -195,39 +229,9 @@ return (
         )
       }}
     ></FlatList>
-    <Text>Score: {totalScore}</Text>
+    
   </View>
   )  
-}
-
-export default function App() {
-  cacheFonts([FontAwesome.font])
-  return (
-    <NavigationContainer>
-      <Stack.Navigator initialRouteName="Question">
-        <Stack.Screen
-          name="Question"
-          initialParams={{
-            questionNumber: 0,
-            data: questions,
-            userChoices: []
-          }}
-          options={{headerShown: false}}>
-          {(props) => <Question {...props} />}
-        </Stack.Screen>
-        <Stack.Screen
-          name="SummaryScreen"
-          initialParams={{
-            questionNumber: questions.length - 1,
-            data: questions,
-            userChoices: [3, [1, 3], 0],
-          }}
-          options={{headerShown: false}}
-          component={SummaryScreen}
-        ></Stack.Screen>
-      </Stack.Navigator>
-    </NavigationContainer>
-  )
 }
 
 const styles = StyleSheet.create({
