@@ -6,7 +6,7 @@
 import { StatusBar } from 'expo-status-bar';
 import { StyleSheet, View, FlatList } from 'react-native';
 import { Button, Input, Text, ButtonGroup } from '@rneui/themed';
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useCallback, Fragment } from 'react';
 import { NavigationContainer } from '@react-navigation/native';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import * as React from 'react';
@@ -14,6 +14,8 @@ import * as Font from 'expo-font';
 import FontAwesome from '@expo/vector-icons/FontAwesome';
 import { CheckBox } from 'react-native-elements';
 import SelectDropdown from 'react-native-select-dropdown';
+import { Listbox } from '@headlessui/react';
+import { CheckIcon } from '@heroicons/react/20/solid';
 
 async function cacheFonts(fonts) {
   return fonts.map(async (font) => await Font.loadAsync(font))
@@ -81,6 +83,9 @@ function Question({navigation, route}) {
   let { choices, prompt, type } = data[questionNumber]
   let [selectedIndex, setSelectedIndex] = useState(0)
   let [selectedIndexes, setSelectedIndexes] = useState([])
+  let [openResponse, setOpenResponse] = useState("")
+  let [dropDown, setDropDown] = useState(false)
+  let [selectedAnswer, setSelectedAnswer] = useState("")
   let nextQuestion = () => {
     let nextQuestion = questionNumber + 1
     if ( type !== 'multiple-answer' || 'drop-down') {
@@ -103,13 +108,23 @@ function Question({navigation, route}) {
       })
     }
   }
+  let validate = useCallback(() => {
+    if (openResponse.toLowerCase() !== questions[3].correct) {
+      console.log("incorrect")
+    } else {
+      console.log("correct")
+    }
+  })
   if (type == 'open-response') {
     return (
       <View style={styles.container}>
         <Text style={styles.heading}>{prompt}</Text>
         <Input
           testID="choices"
-          placeholder='Answer..'
+          placeholder='Answer...'
+          onChangeText={setOpenResponse}
+          value={openResponse}
+          onBlur={validate}
         />
         <Button 
           testId="next-question"
@@ -120,25 +135,26 @@ function Question({navigation, route}) {
     )
   }
   if (type == 'drop-down') {
+    const questions4 = questions[4].choices
     return (
       <View style={styles.container}>
         <Text style={styles.heading}>{prompt}</Text>
-        <SelectDropdown
-            data={questions[4].choices}
-            onSelect={(selectedItem, index) => {
-              console.log(selectedItem, index)
-            }}
-            buttonTextAfterSelection={(selectedItem, index) => {
-              // text represented after item is selected
-              // if data array is an array of objects then return selectedItem.property to render after item is selected
-              return selectedItem.choice
-            }}
-            rowTextForSelection={(item, index) => {
-              // text represented for each item in dropdown
-              // if data array is an array of objects then return item.property to represent item in dropdown
-              return item
-            }}
-        />
+        <Listbox value={dropDown} onChange={setDropDown}>
+          <Listbox.Button>{dropDown || "Choose an answer..."}</Listbox.Button>
+          <Listbox.Options>
+            {questions4.map((choice, index) => (
+              <Listbox.Option
+                key={index}
+                value={choice}
+                as={Fragment}
+              >
+                  <li>
+                    {choice}
+                  </li>
+              </Listbox.Option>
+            ))}
+          </Listbox.Options>
+        </Listbox>
         <Button 
           testId="next-question"
           onPress={nextQuestion}
