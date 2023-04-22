@@ -86,11 +86,10 @@ function Question({navigation, route}) {
   return (
   <View style={styles.container}>
     <Text>{prompt}</Text>
-    {type !== 'multiple-anser' ? (
+    {type !== 'multiple-answer' ? (
       <ButtonGroup
         testID="choices"
         buttons={choices}
-        vertical
         selectedIndex={selectedIndex}
         onPress={(value) => {
           setSelectedIndex(value)
