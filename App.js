@@ -2,6 +2,7 @@
 // question one reference - https://colorcodedlyrics.com/2022/12/30/ateez-halazia/
 // question two refercne - https://colorcodedlyrics.com/2021/12/09/xdinary-heroes-egseudineoli-hieolojeu-happy-death-day/
 // question three reference  - https://colorcodedlyrics.com/2021/12/23/stray-kids-broken-compass-gojangnan-nachimban/
+// listbox from https://headlessui.com/react/listbox
 
 import { StatusBar } from 'expo-status-bar';
 import { StyleSheet, View, FlatList } from 'react-native';
@@ -13,9 +14,7 @@ import * as React from 'react';
 import * as Font from 'expo-font';
 import FontAwesome from '@expo/vector-icons/FontAwesome';
 import { CheckBox } from 'react-native-elements';
-import SelectDropdown from 'react-native-select-dropdown';
 import { Listbox } from '@headlessui/react';
-import { CheckIcon } from '@heroicons/react/20/solid';
 
 async function cacheFonts(fonts) {
   return fonts.map(async (font) => await Font.loadAsync(font))
@@ -85,16 +84,18 @@ function Question({navigation, route}) {
   let [selectedIndexes, setSelectedIndexes] = useState([])
   let [openResponse, setOpenResponse] = useState("")
   let [dropDown, setDropDown] = useState(false)
-  let [selectedAnswer, setSelectedAnswer] = useState("")
+  let userSelected = []
   let nextQuestion = () => {
     let nextQuestion = questionNumber + 1
     if ( type !== 'multiple-answer' || 'drop-down') {
       userChoices.push(selectedIndex)
+      userSelected.push(selectedIndex)
     } else {
       userChoices.push(selectedIndexes)
+      userSelected.push(selectedIndexes)
     }
     if (nextQuestion < questions.length) {
-      console.log("next question")
+      console.log("Navigating to next question")
       navigation.navigate('Question', {
         questionNumber: nextQuestion,
         questions,
@@ -201,16 +202,28 @@ function Question({navigation, route}) {
 }
 
   function SummaryScreen({route}) {
-    let calculateCorrect = (userSelected, correct, type) => {
-      let userCorrect = false 
+    let userSelected = route.params.userSelected
+    let calculateCorrect = (correct, type) => {
+      let userCorrect = false
+      console.log("userSelected: " + userSelected)
       if (type == 'multiple-answer') {
-        userCorrect = correct.every(item => userSelected.includes(item))
-        && userSelected.every(item => correct.includes(item))
+        userCorrect = correct.every((item) => userSelected.includes(item))
+        && userSelected.every((item) => correct.includes(item))
       } else {
-        userCorrect = userSelected === correct 
+        userCorrect = userSelected === correct
       }
       return userCorrect
     }
+    // let calculateCorrect = (userSelected, correct, type) => {
+    //   let userCorrect = false
+    //   console.log(userSelected)
+    //   if (type == 'multiple-answer') {
+    //     userCorrect = userSelected.sort().toString() === correct.sort().toString()
+    //   } else {
+    //     userCorrect = userSelected === correct 
+    //   }
+    //     return userCorrect
+    //   }
     let totalScore = 0
     for (let i = 0; i < route.params.data.length; i++) {
       if (
@@ -233,7 +246,7 @@ function Question({navigation, route}) {
       renderItem={({item, index}) => {
         let { choices, prompt, type, correct } = item
         let userSelected = route.params.userChoices[index]
-        let userCorrect = calculateCorrect(userSelected, correct, type)
+        //let userCorrect = calculateCorrect(userSelected, correct, type)
         return (
           <View key={index}>
             <Text style={styles.subheading}>{prompt}</Text>
