@@ -1,10 +1,3 @@
-// used lab9 as a base
-// question one reference - https://colorcodedlyrics.com/2022/12/30/ateez-halazia/
-// question two refercne - https://colorcodedlyrics.com/2021/12/09/xdinary-heroes-egseudineoli-hieolojeu-happy-death-day/
-// question three reference  - https://colorcodedlyrics.com/2021/12/23/stray-kids-broken-compass-gojangnan-nachimban/
-// listbox from https://headlessui.com/react/listbox
-
-import { StatusBar } from 'expo-status-bar';
 import { StyleSheet, View, FlatList } from 'react-native';
 import { Button, Input, Text, ButtonGroup } from '@rneui/themed';
 import { useEffect, useState, useCallback, Fragment } from 'react';
