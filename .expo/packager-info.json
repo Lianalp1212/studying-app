@@ -2,8 +2,8 @@
   "expoServerPort": 19000,
   "packagerPort": 19000,
   "packagerPid": null,
-  "expoServerNgrokUrl": null,
-  "packagerNgrokUrl": null,
-  "ngrokPid": null,
+  "expoServerNgrokUrl": "https://rn-2dg.lianalp1212.study-app.exp.direct",
+  "packagerNgrokUrl": "https://rn-2dg.lianalp1212.study-app.exp.direct",
+  "ngrokPid": 20928,
   "webpackServerPort": 19006
 }
