@@ -79,14 +79,12 @@ function Question({navigation, route}) {
   let [selectedIndexes, setSelectedIndexes] = useState([])
   let [openResponse, setOpenResponse] = useState("")
   let [dropDown, setDropDown] = useState(false)
-  let nextQuestion = () => {
+  let nextQuestion = (userSelected) => {
     let nextQuestion = questionNumber + 1
     if ( type !== 'multiple-answer' || 'drop-down') {
       userChoices.push(selectedIndex)
-      userSelected.push(selectedIndex)
     } else {
       userChoices.push(selectedIndexes)
-      userSelected.push(selectedIndexes)
     }
     if (nextQuestion < questions.length) {
       console.log("Navigating to next question")
@@ -100,7 +98,6 @@ function Question({navigation, route}) {
         questionNumber: nextQuestion,
         questions,
         userChoices,
-        userSelected,
       })
     }
   }
@@ -200,31 +197,34 @@ function Question({navigation, route}) {
   )
 }
 
-let userSelected = []
 function SummaryScreen({route}) {
-  userSelected = route.params.userSelected
+  // userSelected = route.params.userSelected
+  // let calculateCorrect = (userSelected, correct, type) => {
+  // let userCorrect = false
+  // console.log("userSelected: " + userSelected)
+  // if (!Array.isArray(userSelected)) {
+  //   userSelected = []
+  // } 
+  // if (Array.isArray(userSelected) && userSelected.includes && type == 'multiple-answer') {
+  //   userCorrect = correct.every((item) => Array.isArray(userSelected) && userSelected.includes(item))
+  //   && userSelected.every((item) => Array.isArray(correct) && correct.includes(item))
+  // } else {
+  //   const userSelectedArr = Array.isArray(userSelected) ? userSelected : [userSelected]
+  //   userCorrect = userSelectedArr[0] === correct
+  // }
+  // return userCorrect
+  // }
   let calculateCorrect = (userSelected, correct, type) => {
-  let userCorrect = false
-  console.log("userSelected: " + userSelected)
-  if (type == 'multiple-answer') {
-    userCorrect = correct.every((item) => userSelected.includes(item))
-    && userSelected.every((item) => correct.includes(item))
-  } else {
-    const userSelectedArr = Array.isArray(userSelected) ? userSelected : [userSelected]
-    userCorrect = userSelectedArr[0] === correct
-  }
-  return userCorrect
-  }
-    // let calculateCorrect = (userSelected, correct, type) => {
-    //   let userCorrect = false
-    //   console.log(userSelected)
-    //   if (type == 'multiple-answer') {
-    //     userCorrect = userSelected.sort().toString() === correct.sort().toString()
-    //   } else {
-    //     userCorrect = userSelected === correct 
-    //   }
-    //     return userCorrect
-    //   }
+    let userCorrect = false
+    console.log("userSelected: " + userSelected)
+    userSelected = Array.isArray(userSelected) ? userSelected : [userSelected]
+    if (type == 'multiple-answer') {
+      userCorrect = userSelected.sort().toString() === correct.sort().toString()
+    } else {
+      userCorrect = userSelected[0] === correct 
+    }
+      return userCorrect
+    }
   let totalScore = 0
   for (let i = 0; i < route.params.data.length; i++) {
     if (
@@ -247,7 +247,6 @@ function SummaryScreen({route}) {
       renderItem={({item, index}) => {
         let { choices, prompt, type, correct } = item
         let userSelected = route.params.userChoices[index]
-        //let userCorrect = calculateCorrect(userSelected, correct, type)
         return (
           <View key={index}>
             <Text style={styles.subheading}>{prompt}</Text>

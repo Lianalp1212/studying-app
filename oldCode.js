@@ -58,7 +58,6 @@ function Question({navigation, route}) {
   console.log(route.params)
   const { questionNumber, userChoices, data } = route.params
   let { choices, prompt, type } = data[questionNumber]
-  let initialSelection = 0
   let [selectedIndex, setSelectedIndex] = useState(0)
   let [selectedIndexes, setSelectedIndexes] = useState([])
   let nextQuestion = () => {
