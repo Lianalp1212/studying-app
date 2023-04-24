@@ -299,11 +299,10 @@ return (
         )
       }}
     ></FlatList>
-    <Button title="Restart" style={styles.button} onPress={() => navigation.navigate('Question')}></Button>
   </View>
   )  
 }
-
+// <Button title="Restart" style={styles.button} onPress={() => navigation.navigate('Question')}></Button>
 export default function App() {
   cacheFonts([FontAwesome.font])
   return (
