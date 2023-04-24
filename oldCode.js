@@ -994,3 +994,23 @@ if (type == 'drop-down') {
     </View>
   )
 }
+
+
+<Listbox value={dropDown} onChange={setDropDown}>
+          <Listbox.Button style={styles.listbox}>
+            {dropDown || "Choose an answer..."}
+          </Listbox.Button>    
+          <Listbox.Options>
+            {questions4.map((choice, index) => (
+              <Listbox.Option
+                key={index}
+                value={choice}
+                as={Fragment}
+              >
+                  <Unorderedlist bulletUnicode={none}>
+                    <Text>{choice}</Text>
+                  </Unorderedlist>
+              </Listbox.Option>
+            ))}
+          </Listbox.Options>
+        </Listbox>

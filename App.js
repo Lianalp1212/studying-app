@@ -8,6 +8,8 @@ import * as Font from 'expo-font';
 import FontAwesome from '@expo/vector-icons/FontAwesome';
 import { CheckBox } from 'react-native-elements';
 import { Listbox } from '@headlessui/react';
+import Unorderedlist from 'react-native-unordered-list';
+import { SafeAreaView } from 'react-native-safe-area-context';
 
 async function cacheFonts(fonts) {
   return fonts.map(async (font) => await Font.loadAsync(font))
@@ -77,7 +79,6 @@ function Question({navigation, route}) {
   let [selectedIndexes, setSelectedIndexes] = useState([])
   let [openResponse, setOpenResponse] = useState("")
   let [dropDown, setDropDown] = useState(false)
-  let userSelected = []
   let nextQuestion = () => {
     let nextQuestion = questionNumber + 1
     if ( type !== 'multiple-answer' || 'drop-down') {
@@ -99,6 +100,7 @@ function Question({navigation, route}) {
         questionNumber: nextQuestion,
         questions,
         userChoices,
+        userSelected,
       })
     }
   }
@@ -130,21 +132,25 @@ function Question({navigation, route}) {
   }
   if (type == 'drop-down') {
     const questions4 = questions[4].choices
+    const MyListBoxOption = React.forwardRef((props, ref) => {
+      return <Unorderedlist {...props} ref={ref} />
+    })
     return (
       <View style={styles.container}>
         <Text style={styles.heading}>{prompt}</Text>
         <Listbox value={dropDown} onChange={setDropDown}>
-          <Listbox.Button>{dropDown || "Choose an answer..."}</Listbox.Button>
+          <Listbox.Button style={styles.listbox}>
+            {dropDown || "Choose an answer..."}
+          </Listbox.Button>    
           <Listbox.Options>
             {questions4.map((choice, index) => (
               <Listbox.Option
                 key={index}
                 value={choice}
-                as={Fragment}
               >
-                  <li>
-                    {choice}
-                  </li>
+                <MyListBoxOption>
+                  <Text style={styles.choices}>{choice}</Text>
+                </MyListBoxOption>
               </Listbox.Option>
             ))}
           </Listbox.Options>
@@ -194,19 +200,21 @@ function Question({navigation, route}) {
   )
 }
 
-  function SummaryScreen({route}) {
-    let userSelected = route.params.userSelected
-    let calculateCorrect = (correct, type) => {
-      let userCorrect = false
-      console.log("userSelected: " + userSelected)
-      if (type == 'multiple-answer') {
-        userCorrect = correct.every((item) => userSelected.includes(item))
-        && userSelected.every((item) => correct.includes(item))
-      } else {
-        userCorrect = userSelected === correct
-      }
-      return userCorrect
-    }
+let userSelected = []
+function SummaryScreen({route}) {
+  userSelected = route.params.userSelected
+  let calculateCorrect = (userSelected, correct, type) => {
+  let userCorrect = false
+  console.log("userSelected: " + userSelected)
+  if (type == 'multiple-answer') {
+    userCorrect = correct.every((item) => userSelected.includes(item))
+    && userSelected.every((item) => correct.includes(item))
+  } else {
+    const userSelectedArr = Array.isArray(userSelected) ? userSelected : [userSelected]
+    userCorrect = userSelectedArr[0] === correct
+  }
+  return userCorrect
+  }
     // let calculateCorrect = (userSelected, correct, type) => {
     //   let userCorrect = false
     //   console.log(userSelected)
@@ -217,17 +225,17 @@ function Question({navigation, route}) {
     //   }
     //     return userCorrect
     //   }
-    let totalScore = 0
-    for (let i = 0; i < route.params.data.length; i++) {
-      if (
-        calculateCorrect(
-          route.params.userChoices[i],
-          route.params.data[i].correct,
-          route.params.data[i].type
-        )) {
-        totalScore++
-      }
+  let totalScore = 0
+  for (let i = 0; i < route.params.data.length; i++) {
+    if (
+      calculateCorrect(
+        route.params.userChoices[i],
+        route.params.data[i].correct,
+        route.params.data[i].type
+      )) {
+      totalScore++
     }
+  }
   return (
     <View style={styles.container}>
       <View>
@@ -369,5 +377,18 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     textAlign: 'center',
     padding: 10
+  },
+  choices: {
+    margin: 6,
+    padding: 6,
+    textAlign: 'center',
+    fontStyle: 'semibold',
+    backgroundColor: '#DFEDFF',
+  },
+  listbox: {
+    margin: 15,
+    padding: 10,
+    marginBottom: 20,
+    backgroundColor: '#9FCBFF'
   }
 })

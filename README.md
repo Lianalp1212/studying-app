@@ -8,7 +8,7 @@ This app was designed to help people study. It has a variety of question styles:
 - Open response
 - Drop down selection
 
-At the end of the quiz, users will be able to see what questions they answered correctly and incorrectly, recieving a score and the correct answers verus what they responded with. 
+At the end of the quiz, users will be able to see what questions they answered correctly and incorrectly, receiving a score and the correct answers versus what they responded with. 
 Throughout the quiz, users will be unable to go back. They must complete the quiz. In the Summary screen, along with viewing their score, users are able to retake the quiz.
 <br>
 <br>
