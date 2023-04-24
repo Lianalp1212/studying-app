@@ -1,0 +1,9 @@
+{
+  "background_color": "#ffffff",
+  "display": "standalone",
+  "lang": "en",
+  "name": "lab8",
+  "short_name": "lab8",
+  "start_url": "/?utm_source=web_app_manifest",
+  "orientation": "portrait"
+}
