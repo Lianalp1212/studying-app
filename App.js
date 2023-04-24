@@ -1,6 +1,6 @@
-import { StyleSheet, View, FlatList } from 'react-native';
+import { StyleSheet, View, FlatList, TextInput } from 'react-native';
 import { Button, Input, Text, ButtonGroup } from '@rneui/themed';
-import { useEffect, useState, useCallback, Fragment } from 'react';
+import { useEffect, useState, useCallback } from 'react';
 import { NavigationContainer } from '@react-navigation/native';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import * as React from 'react';
@@ -9,7 +9,6 @@ import FontAwesome from '@expo/vector-icons/FontAwesome';
 import { CheckBox } from 'react-native-elements';
 import { Listbox } from '@headlessui/react';
 import Unorderedlist from 'react-native-unordered-list';
-import { SafeAreaView } from 'react-native-safe-area-context';
 
 async function cacheFonts(fonts) {
   return fonts.map(async (font) => await Font.loadAsync(font))
@@ -25,7 +24,7 @@ const questions = [
       "거울 속 비친 넌 누구인가",
       "기대 안에 기대 이 길의 뒤에",
       "All of the above",
-  ],
+    ],
     "correct": 3
   },
   {
@@ -36,22 +35,24 @@ const questions = [
       "Death",
       "Best",
       "Worst",
-  ],
-    "correct": [1, 3]
+    ],
+    "correct": [1,3]
   },
   {
     "prompt": `Q3: Is the following statment true or false?\n
-      "Stray Kids, STAY or none, we're gonna cross the finish line"`,
+      Stray Kids, STAY or none, we're gonna cross the finish line`,
     "type": "true-false",
     "choices": [
       "True",
       "False",
-  ],
+    ],
     "correct": 0
   },
   {
     "prompt": `Q4: What does ZB1 stand for?`,
     "type": "open-response",
+    "choices": [
+    ],
     "correct": "zerobaseone"
   },
   {
@@ -66,9 +67,9 @@ const questions = [
       "Adults",
       "Girlz",
       "Girls",
-  ],
+    ],
     "correct": 0
-  },
+  }
 ]
 
 function Question({navigation, route}) {
@@ -79,46 +80,46 @@ function Question({navigation, route}) {
   let [selectedIndexes, setSelectedIndexes] = useState([])
   let [openResponse, setOpenResponse] = useState("")
   let [dropDown, setDropDown] = useState(false)
-  let nextQuestion = (userSelected) => {
+  let nextQuestion = () => {
     let nextQuestion = questionNumber + 1
-    if ( type !== 'multiple-answer' || 'drop-down') {
+    if ( type !== 'multiple-answer') {
       userChoices.push(selectedIndex)
     } else {
       userChoices.push(selectedIndexes)
     }
     if (nextQuestion < questions.length) {
-      console.log("Navigating to next question")
+      console.log("next question")
       navigation.navigate('Question', {
         questionNumber: nextQuestion,
         questions,
         userChoices,
+        openResponse,
       })
     } else {
       navigation.navigate('SummaryScreen', {
         questionNumber: nextQuestion,
         questions,
         userChoices,
+        openResponse,
       })
     }
   }
-  let validate = useCallback(() => {
-    if (openResponse.toLowerCase() !== questions[3].correct) {
-      console.log("incorrect")
-    } else {
-      console.log("correct")
-    }
-  })
   if (type == 'open-response') {
     return (
       <View style={styles.container}>
         <Text style={styles.heading}>{prompt}</Text>
-        <Input
+        {/* <Input
           testID="choices"
-          placeholder='Answer...'
+          placeholder='Your answer...'
           onChangeText={setOpenResponse}
           value={openResponse}
-          onBlur={validate}
-        />
+        /> */}
+        <TextInput testID="choices" 
+          placeholder="Your answer..."
+          style={styles.input}
+          onChangeText={(text) => setOpenResponse(text)}
+          value={openResponse}>
+        </TextInput>
         <Button 
           testId="next-question"
           onPress={nextQuestion}
@@ -174,7 +175,7 @@ function Question({navigation, route}) {
         }}
         containerStyle={{marginBottom: 20, width: '70'}}
         />
-    ) : (
+    ):(
       <ButtonGroup
         testID="choices"
         buttons={choices}
@@ -184,8 +185,7 @@ function Question({navigation, route}) {
         onPress={(value) => {
           setSelectedIndexes(value)
         }}
-        containerStyle={{marginBottom: 20, width: '70'}}
-        
+        containerStyle={{marginBottom: 20, width: '70'}}    
       />
     )}
     <Button 
@@ -197,100 +197,112 @@ function Question({navigation, route}) {
   )
 }
 
-function SummaryScreen({route}) {
-  // userSelected = route.params.userSelected
-  // let calculateCorrect = (userSelected, correct, type) => {
-  // let userCorrect = false
-  // console.log("userSelected: " + userSelected)
-  // if (!Array.isArray(userSelected)) {
-  //   userSelected = []
-  // } 
-  // if (Array.isArray(userSelected) && userSelected.includes && type == 'multiple-answer') {
-  //   userCorrect = correct.every((item) => Array.isArray(userSelected) && userSelected.includes(item))
-  //   && userSelected.every((item) => Array.isArray(correct) && correct.includes(item))
-  // } else {
-  //   const userSelectedArr = Array.isArray(userSelected) ? userSelected : [userSelected]
-  //   userCorrect = userSelectedArr[0] === correct
-  // }
-  // return userCorrect
-  // }
+function SummaryScreen({route, openResponse}) {
   let calculateCorrect = (userSelected, correct, type) => {
-    let userCorrect = false
-    console.log("userSelected: " + userSelected)
-    userSelected = Array.isArray(userSelected) ? userSelected : [userSelected]
+    let userCorrect = false 
     if (type == 'multiple-answer') {
       userCorrect = userSelected.sort().toString() === correct.sort().toString()
     } else {
-      userCorrect = userSelected[0] === correct 
+      userCorrect = userSelected == correct 
     }
-      return userCorrect
-    }
+    return userCorrect
+  }
   let totalScore = 0
+  let openResLower = route.params.openResponse.toLowerCase()
   for (let i = 0; i < route.params.data.length; i++) {
-    if (
-      calculateCorrect(
-        route.params.userChoices[i],
-        route.params.data[i].correct,
-        route.params.data[i].type
-      )) {
+    if (calculateCorrect(
+      route.params.userChoices[i],
+      route.params.data[i].correct,
+      route.params.data[i].type
+      )
+    ) {
+      totalScore++
+    } else if (route.params.data[i].type == 'open-response' && 
+      openResLower == route.params.data[i].correct) {
       totalScore++
     }
   }
-  return (
-    <View style={styles.container}>
-      <View>
-        <Text style={styles.heading}>Summary</Text>
-        <Text style={styles.subheading}>Score: {totalScore}</Text>
-      </View>
-      <FlatList
-      data={route.params.data}
-      renderItem={({item, index}) => {
-        let { choices, prompt, type, correct } = item
-        let userSelected = route.params.userChoices[index]
-        return (
-          <View key={index}>
-            <Text style={styles.subheading}>{prompt}</Text>
-            {choices.map((value, choiceIndex) => {
-              let incorrect = false
-              let userDidSelect = false 
-              if (type == 'multiple-answer') {
-                userDidSelect = userSelected.includes(choiceIndex)
-                incorrect = userDidSelect && !correct.includes(choiceIndex)
-              } else {
-                userDidSelect = userSelected == choiceIndex
-                incorrect = userDidSelect && userSelected !== correct
-              }
-              return (
-                <CheckBox
-                containerStyle={{
-                  backgroundColor: userDidSelect ? incorrect == false
-                    ? 'lightgreen'
-                    : 'gray'
-                  : undefined,
-                }}
-                checked = {
-                  type == 'multiple-answer'
-                    ? correct.includes(choiceIndex)
-                    : correct == choiceIndex
-                }
-                textStyle={{
-                  textDecorationLine: incorrect
-                    ? 'line-through'
-                    : undefined,
-                }}
-                key={value}
-                title={value}
-                ></CheckBox>
-              )
-            })}
-          </View>
-          )
-        }}
-      ></FlatList>
-      <Button title="Restart" style={styles.button} onPress={() => navigation.navigate('Question')}></Button>
+return (
+  <View style={styles.container}>
+    <View>
+      <Text style={styles.heading}>Summary</Text>
+      <Text style={styles.subheading}>Score: {totalScore}</Text>
     </View>
-    )  
-  }
+    <FlatList
+    data={route.params.data}
+    renderItem={({item, index}) => {
+      let { choices, prompt, type, correct } = item
+      let userSelected = route.params.userChoices[index]
+      let openAnswer = ""
+      if (type == 'open-response') {
+        openAnswer = correct
+      }
+      let isCorrect = openResLower === correct
+        if (openResLower == correct) {
+          <Text style={{backgroundColor: 'lightgreen', textAlign: 'center', fontSize: 20}}>Correct</Text>
+        } else {
+          <Text style={{backgroundColor: 'lightgray', textAlign: 'center', fontSize: 20}}>Incorrect</Text>
+        }
+      console.log("index " + index)
+      console.log("userSelected " + userSelected)
+      console.log("openResponse " + openResponse)
+      console.log("isCorrect " + isCorrect)
+      return (
+        <View key={index}>
+          <Text style={styles.subheading}>{prompt}</Text>
+          { type == 'open-response' ? (
+            <View>
+              <Text style={styles.openRes}>Your answer: {route.params.openResponse}</Text>
+              <Text style={styles.openRes}>Correct answer: {openAnswer}</Text>
+              {isCorrect ? (
+                <Text style={{backgroundColor: 'lightgreen', textAlign: 'center', fontSize: 20}}>Correct</Text>
+              ) : (
+                <Text style={{backgroundColor: 'lightgray', textAlign: 'center', fontSize: 20}}>Incorrect</Text>
+              )}
+            </View>
+          ) : (
+          choices.map((value, choiceIndex) => {
+            let incorrect = false
+            let userDidSelect = false 
+            if (type == 'multiple-answer') {
+              userDidSelect = userSelected.includes(choiceIndex)
+              incorrect = userDidSelect && !correct.includes(choiceIndex)
+            } else {
+              userDidSelect = userSelected == choiceIndex
+              incorrect = userDidSelect && userSelected !== correct
+            }
+            return (
+              <CheckBox
+              containerStyle={{
+                backgroundColor: userDidSelect ? incorrect == false
+                  ? 'lightgreen'
+                  : 'lightgray'
+                : undefined,
+              }}
+              checked = {
+                type == 'multiple-answer'
+                  ? correct.includes(choiceIndex)
+                  : correct == choiceIndex
+              }
+              textStyle={{
+                textDecorationLine: incorrect
+                  ? 'line-through'
+                  : undefined,
+              }}
+              key={value}
+              title={value}
+              ></CheckBox>
+            )
+          })
+        )}
+        </View>
+        )
+      }}
+    ></FlatList>
+    <Button title="Restart" style={styles.button} onPress={() => navigation.navigate('Question')}></Button>
+  </View>
+  )  
+}
 
 export default function App() {
   cacheFonts([FontAwesome.font])
@@ -312,7 +324,7 @@ export default function App() {
           initialParams={{
             questionNumber: questions.length - 1,
             data: questions,
-            userChoices: [3, [1, 3], 0, "zerobaseone", "Boyz"],
+            userChoices: [3, [1, 3], 0, "zonebaseone", 0],
           }}
           options={{headerShown: false}}
           component={SummaryScreen}
@@ -389,5 +401,17 @@ const styles = StyleSheet.create({
     padding: 10,
     marginBottom: 20,
     backgroundColor: '#9FCBFF'
-  }
+  },
+  openRes: {
+    fontSize: 20,
+    textAlign: 'center',
+    margins: 10  
+  },
+  input: {
+    backgroundColor: "#D5D5D5",
+    fontSize: 20,
+    alignItems: 'center',
+    padding: 10,
+    margin: 15
+  },
 })
