@@ -14,7 +14,7 @@ Throughout the quiz, users will be unable to go back. They must complete the qui
 <br>
 
 ## My contributions
-This app started as a project in my Mobile Development class. I extended this app by creating new question styles. I created the open response and drop down selection style questions. For the styling/format of the drop down I used [Headless UI's listbox.](https://headlessui.com/react/listbox) 
+This app started as a project in my Mobile Development class. I extended this app by creating new question styles. I created the open response and drop down selection style questions. For the format of the drop down I used [Headless UI's listbox.](https://headlessui.com/react/listbox) 
 <br>
 <br>
 
